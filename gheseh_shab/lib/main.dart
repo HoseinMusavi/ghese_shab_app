@@ -5,6 +5,7 @@ import 'package:gheseh_shab/app.dart';
 import 'package:gheseh_shab/data/repositories/auth_repository.dart';
 import 'package:gheseh_shab/data/repositories/category_repository.dart';
 import 'package:gheseh_shab/data/repositories/story_repository.dart';
+import 'package:gheseh_shab/data/repositories/user_repository.dart';
 import 'package:gheseh_shab/logic/auth/login_bloc.dart';
 import 'package:gheseh_shab/logic/auth/register/register_bloc.dart';
 import 'package:gheseh_shab/logic/auth/reset_password_bloc.dart';
@@ -12,6 +13,8 @@ import 'package:gheseh_shab/logic/category/category_bloc.dart';
 import 'package:gheseh_shab/logic/navigation/navigation_bloc.dart';
 import 'package:gheseh_shab/logic/story_bloc/story_bloc.dart';
 import 'package:gheseh_shab/logic/story_bloc/story_event.dart';
+import 'package:gheseh_shab/logic/user_info/user_bloc.dart';
+import 'package:gheseh_shab/logic/user_info/user_event.dart';
 import 'package:gheseh_shab/utils/theme.dart';
 
 void main() {
@@ -26,14 +29,15 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  ThemeMode _themeMode = ThemeMode.system; // حالت پیش‌فرض تم
-  late ThemeData _currentTheme; // ذخیرهflutter run -v مرجع تم
+  ThemeMode _themeMode = ThemeMode.dark; // حالت پیش‌فرض تم دارک
+  late ThemeData _currentTheme; // ذخیره مرجع تم
 
   // وابستگی‌ها
   late final Dio _dio;
   late final AuthRepository _authRepository;
   late final StoryRepository _storyRepository;
   late final CategoryRepository _categoryRepository;
+  late final UserRepository _userRepository;
 
   @override
   void initState() {
@@ -44,6 +48,8 @@ class _MyAppState extends State<MyApp> {
     _authRepository = AuthRepository(dio: _dio);
     _storyRepository = StoryRepository(); // فقط یک بار مقداردهی شود
     _categoryRepository = CategoryRepository(dio: _dio);
+    _userRepository =
+        UserRepository(authRepository: _authRepository, dio: _dio);
   }
 
   void _setThemeMode(ThemeMode mode) {
@@ -67,6 +73,10 @@ class _MyAppState extends State<MyApp> {
       providers: [
         BlocProvider(
           create: (context) => LoginBloc(_authRepository),
+        ),
+        BlocProvider(
+          create: (context) => UserBloc(userRepository: _userRepository)
+            ..add(CheckUserLoginEvent()),
         ),
         BlocProvider(
           create: (context) =>

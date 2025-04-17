@@ -30,8 +30,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  flutter_bloc: ^8.1.3  # برای مدیریت وضعیت
-  dio: ^5.4.0          # برای ارتباط با API
+  flutter_bloc: ^8.0.0  # برای مدیریت وضعیت
+  dio: ^5.0.0          # برای ارتباط با API
   equatable: ^2.0.5    # برای مقایسه مدل‌ها در BLoC
   get_it: ^7.6.7       # برای مدیریت وابستگی‌ها (Dependency Injection)
 
@@ -44,7 +44,8 @@ dependencies:
   marquee: ^2.2.3
   lottie: ^3.1.3
   image_picker: ^1.1.2
-  persian_datetime_picker: ^3.1.0
+  persian_datetime_picker: ^2.0.0
+  cross_file: ^0.3.4+2
   flutter_localizations:
     sdk: flutter
 

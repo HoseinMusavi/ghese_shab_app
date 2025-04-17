@@ -65,7 +65,12 @@ class _UserDetailsScreenState extends State<UserDetailsScreen> {
                       MaterialPageRoute(
                         builder: (context) => const AccountUpdateScreen(),
                       ),
-                    );
+                    ).then((_) {
+                      // پس از بازگشت از صفحه ویرایش، اطلاعات کاربر را دوباره بارگذاری کن
+                      setState(() {
+                        _userFuture = widget.userRepository.fetchUserInfo();
+                      });
+                    });
                   },
                   color: isDark ? Colors.blueGrey[700]! : Colors.blue,
                 ),
@@ -133,6 +138,22 @@ class _UserDetailsScreenState extends State<UserDetailsScreen> {
                 const SizedBox(height: 8),
                 Text(
                   'موجودی: ${user.balance} سکه',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: isDark ? Colors.white70 : Colors.grey[800],
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'استان: ${user.province}',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: isDark ? Colors.white70 : Colors.grey[800],
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'شهر: ${user.city}',
                   style: TextStyle(
                     fontSize: 14,
                     color: isDark ? Colors.white70 : Colors.grey[800],

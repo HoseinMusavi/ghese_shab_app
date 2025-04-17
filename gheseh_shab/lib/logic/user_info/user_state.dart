@@ -28,3 +28,14 @@ class UserError extends UserState {
   @override
   List<Object?> get props => [message];
 }
+
+class UserUpdating extends UserState {}
+
+class UserUpdated extends UserState {
+  final Map<String, dynamic> user;
+
+  UserUpdated({required this.user});
+
+  @override
+  List<Object?> get props => [user];
+}

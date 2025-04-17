@@ -90,7 +90,7 @@ packages:
     source: hosted
     version: "1.18.0"
   cross_file:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: cross_file
       sha256: "7caf6a750a0c04effbb52a676dce9a4a592e10ad35c34d6d2d0e4811160d5670"
@@ -537,10 +537,10 @@ packages:
     dependency: "direct main"
     description:
       name: persian_datetime_picker
-      sha256: "7ccbfd3a68dc89d405550f624e9fa590c914fed2aa2d48973c4f4400baab2e06"
+      sha256: "097f69484a4ea8fdf8d2051b0b6205edbed912f096b3c521df0985f656ef5584"
       url: "https://pub.dev"
     source: hosted
-    version: "3.1.0"
+    version: "2.7.0"
   platform:
     dependency: transitive
     description:
@@ -573,14 +573,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.28.0"
-  shamsi_date:
-    dependency: transitive
-    description:
-      name: shamsi_date
-      sha256: "4614789ed11bfffe5ba0aa157a20f2857ab6328528401766e0d924e453c866bd"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.0.4"
   shared_preferences:
     dependency: "direct main"
     description:

@@ -8,6 +8,7 @@ class UserBloc extends Bloc<UserEvent, UserState> {
 
   UserBloc({required this.userRepository}) : super(UserInitial()) {
     on<CheckUserLoginEvent>(_onCheckUserLogin);
+    on<UpdateUserInfoEvent>(_onUpdateUserInfo);
   }
 
   Future<void> _onCheckUserLogin(
@@ -22,6 +23,26 @@ class UserBloc extends Bloc<UserEvent, UserState> {
       }
     } catch (e) {
       emit(UserError("خطا در بررسی وضعیت ورود: $e"));
+    }
+  }
+
+  Future<void> _onUpdateUserInfo(
+      UpdateUserInfoEvent event, Emitter<UserState> emit) async {
+    emit(UserUpdating());
+    try {
+      final updatedUser = await userRepository.updateAccount(
+        firstName: event.userInfo['first_name'],
+        lastName: event.userInfo['last_name'],
+        birthday: event.userInfo['birthday'],
+        gender: event.userInfo['gender'],
+        country: event.userInfo['country'],
+        province: event.userInfo['province'],
+        city: event.userInfo['city'],
+        image: event.image,
+      );
+      emit(UserUpdated(user: updatedUser));
+    } catch (e) {
+      emit(UserError("خطا در به‌روزرسانی اطلاعات: $e"));
     }
   }
 }

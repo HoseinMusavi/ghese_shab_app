@@ -4,6 +4,7 @@ import 'package:gheseh_shab/app.dart';
 import 'package:gheseh_shab/logic/auth/register/register_bloc.dart';
 import 'package:gheseh_shab/logic/auth/register/register_event.dart';
 import 'package:gheseh_shab/logic/auth/register/register_state.dart';
+import 'package:gheseh_shab/main.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -44,14 +45,11 @@ class RegisterScreen extends StatelessWidget {
             );
 
             // هدایت به صفحه اصلی به صورت بهینه
-            Navigator.of(context).pushReplacement(
+            Navigator.of(context).pushAndRemoveUntil(
               MaterialPageRoute(
-                builder: (context) => MainNavigationScreen(
-                  setThemeMode: (ThemeMode mode) {
-                    // Add your logic to handle theme mode changes here
-                  },
-                ), // صفحه اصلی
+                builder: (context) => MyApp(),
               ),
+              (route) => false, // حذف تمام صفحات قبلی
             );
           } else if (state is RegisterFailure) {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -75,34 +73,62 @@ class RegisterScreen extends StatelessWidget {
                 const SizedBox(height: 16),
                 TextField(
                   controller: _firstNameController,
-                  decoration: const InputDecoration(
-                    labelText: "نام",
-                    border: OutlineInputBorder(),
+                  decoration: InputDecoration(
+                    hintText: "نام",
+                    filled: true,
+                    fillColor: isDarkMode ? Colors.grey[800] : Colors.grey[200],
+                    border: InputBorder.none, // حذف خط دور
+                    contentPadding: const EdgeInsets.symmetric(
+                        vertical: 12, horizontal: 16),
+                  ),
+                  style: TextStyle(
+                    color: isDarkMode ? Colors.white : Colors.black,
                   ),
                 ),
                 const SizedBox(height: 16),
                 TextField(
                   controller: _lastNameController,
-                  decoration: const InputDecoration(
-                    labelText: "نام خانوادگی",
-                    border: OutlineInputBorder(),
+                  decoration: InputDecoration(
+                    hintText: "نام خانوادگی",
+                    filled: true,
+                    fillColor: isDarkMode ? Colors.grey[800] : Colors.grey[200],
+                    border: InputBorder.none, // حذف خط دور
+                    contentPadding: const EdgeInsets.symmetric(
+                        vertical: 12, horizontal: 16),
+                  ),
+                  style: TextStyle(
+                    color: isDarkMode ? Colors.white : Colors.black,
                   ),
                 ),
                 const SizedBox(height: 16),
                 TextField(
                   controller: _passwordController,
                   obscureText: true,
-                  decoration: const InputDecoration(
-                    labelText: "رمز عبور",
-                    border: OutlineInputBorder(),
+                  decoration: InputDecoration(
+                    hintText: "رمز عبور",
+                    filled: true,
+                    fillColor: isDarkMode ? Colors.grey[800] : Colors.grey[200],
+                    border: InputBorder.none, // حذف خط دور
+                    contentPadding: const EdgeInsets.symmetric(
+                        vertical: 12, horizontal: 16),
+                  ),
+                  style: TextStyle(
+                    color: isDarkMode ? Colors.white : Colors.black,
                   ),
                 ),
                 const SizedBox(height: 16),
                 TextField(
                   controller: _inviteCodeController,
-                  decoration: const InputDecoration(
-                    labelText: "کد معرف (اختیاری)",
-                    border: OutlineInputBorder(),
+                  decoration: InputDecoration(
+                    hintText: "کد معرف (اختیاری)",
+                    filled: true,
+                    fillColor: isDarkMode ? Colors.grey[800] : Colors.grey[200],
+                    border: InputBorder.none, // حذف خط دور
+                    contentPadding: const EdgeInsets.symmetric(
+                        vertical: 12, horizontal: 16),
+                  ),
+                  style: TextStyle(
+                    color: isDarkMode ? Colors.white : Colors.black,
                   ),
                 ),
                 const SizedBox(height: 20),
@@ -145,11 +171,16 @@ class RegisterScreen extends StatelessWidget {
                                     ),
                                   );
                             },
-                      child: state is RegisterLoading
-                          ? const CircularProgressIndicator(
-                              color: Colors.white,
-                            )
-                          : const Text("ثبت‌نام"),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor:
+                            isDarkMode ? Colors.teal : Colors.blueAccent,
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 12, horizontal: 32),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      child: const Text("ثبت‌نام"),
                     );
                   },
                 ),
