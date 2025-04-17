@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:gheseh_shab/logic/login/login_bloc.dart';
-import 'package:gheseh_shab/logic/login/login_event.dart';
-import 'package:gheseh_shab/logic/login/login_state.dart';
-import 'package:gheseh_shab/presentation/screens/login/login_screen_2.dart';
+import 'package:gheseh_shab/logic/auth/login_bloc.dart';
+import 'package:gheseh_shab/logic/auth/login_event.dart';
+import 'package:gheseh_shab/logic/auth/login_state.dart';
+import 'package:gheseh_shab/presentation/screens/login/verify_screen_2.dart';
+import 'package:gheseh_shab/presentation/screens/login/login_screen_3.dart';
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -37,17 +38,27 @@ class _LoginScreenState extends State<LoginScreen> {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text("در حال ارسال شماره موبایل...")),
             );
-          } else if (state is LoginSuccess) {
-            // نمایش پیام موفقیت
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.message)),
-            );
-            Navigator.of(context)
-                .push(MaterialPageRoute(builder: (context) => LoginScreen2()));
+          } else if (state is RegisterNeeded) {
+            // انتقال به صفحه ثبت‌نام
+            Navigator.of(context).push(MaterialPageRoute(
+              builder: (context) => VerifyScreen(
+                  phoneNumber:
+                      "${_selectedCountryCode}${_phoneController.text.trim()}"),
+            ));
+          } else if (state is LoginAlready) {
+            // انتقال به صفحه ورود
+            Navigator.of(context).push(MaterialPageRoute(
+              builder: (context) => LoginScreen3(
+                  phoneNumber:
+                      "${_selectedCountryCode}${_phoneController.text.trim()}"),
+            ));
+
+            // بازنشانی وضعیت پس از هدایت
+            context.read<LoginBloc>().add(ResetLoginStateEvent());
           } else if (state is LoginFailure) {
             // نمایش پیام خطا
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.error)),
+              SnackBar(content: Text(state.error)), // Display the error message
             );
           }
         },
@@ -123,7 +134,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           keyboardType: TextInputType.phone,
                           style: theme.textTheme.bodyText1,
                           decoration: InputDecoration(
-                            hintText: "9120000000",
+                            hintText: "09120000000",
                             hintStyle: theme.inputDecorationTheme.hintStyle,
                             fillColor: theme.inputDecorationTheme.fillColor,
                             filled: theme.inputDecorationTheme.filled,
@@ -139,68 +150,69 @@ class _LoginScreenState extends State<LoginScreen> {
                 // دکمه ورود
                 BlocBuilder<LoginBloc, LoginState>(
                   builder: (context, state) {
-                    return SizedBox(
-                      width: double.infinity,
-                      height: size.height * 0.07,
-                      child: ElevatedButton(
-                        onPressed: state is LoginLoading
-                            ? null // غیرفعال کردن دکمه هنگام بارگذاری
-                            : () {
-                                final phoneNumber =
-                                    _phoneController.text.trim();
+                    if (state is LoginInitial || state is LoginFailure) {
+                      return SizedBox(
+                        width: double.infinity,
+                        height: size.height * 0.07,
+                        child: ElevatedButton(
+                          onPressed: () {
+                            final phoneNumber = _phoneController.text.trim();
 
-                                // بررسی خالی بودن شماره موبایل
-                                if (phoneNumber.isEmpty) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                      content: Text(
-                                          "لطفاً شماره موبایل خود را وارد کنید."),
-                                      backgroundColor: Colors.orange,
-                                    ),
-                                  );
-                                  return;
-                                }
+                            if (phoneNumber.isEmpty) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text(
+                                      "لطفاً شماره موبایل خود را وارد کنید."),
+                                  backgroundColor: Colors.orange,
+                                ),
+                              );
+                              return;
+                            }
 
-                                // بررسی صحت شماره موبایل (شروع با صفر و 10 رقم)
-                                final isValidPhoneNumber =
-                                    RegExp(r'^0[0-9]{10}$')
-                                        .hasMatch(phoneNumber);
-                                if (!isValidPhoneNumber) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                      content: Text(
-                                          "شماره موبایل وارد شده معتبر نیست."),
-                                      backgroundColor: Colors.red,
-                                    ),
-                                  );
-                                  return;
-                                }
-
-                                // ارسال شماره موبایل به بلاک
-                                context.read<LoginBloc>().add(
-                                      SendPhoneNumberEvent(
-                                          "$_selectedCountryCode$phoneNumber"),
-                                    );
-                              },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: theme.primaryColor, // رنگ دکمه از تم
-                          shape: RoundedRectangleBorder(
-                            borderRadius:
-                                BorderRadius.circular(size.width * 0.02),
+                            context.read<LoginBloc>().add(
+                                  SendPhoneNumberEvent(
+                                      "$_selectedCountryCode$phoneNumber"),
+                                );
+                            print('شماره ارسال شده برا کد' +
+                                "$_selectedCountryCode$phoneNumber");
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor:
+                                theme.primaryColor, // رنگ دکمه از تم
+                            shape: RoundedRectangleBorder(
+                              borderRadius:
+                                  BorderRadius.circular(size.width * 0.02),
+                            ),
+                          ),
+                          child: Text(
+                            "ارسال",
+                            style: theme.textTheme.button?.copyWith(
+                              color: Colors.white,
+                            ),
                           ),
                         ),
-                        child: state is LoginLoading
-                            ? const CircularProgressIndicator(
-                                color: Colors.white,
-                              )
-                            : Text(
-                                "ارسال",
-                                style: theme.textTheme.button?.copyWith(
-                                  color: Colors.white,
-                                ),
-                              ),
-                      ),
-                    );
+                      );
+                    } else if (state is LoginLoading) {
+                      return SizedBox(
+                        width: double.infinity,
+                        height: size.height * 0.07,
+                        child: ElevatedButton(
+                          onPressed: null, // غیرفعال کردن دکمه هنگام بارگذاری
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: theme.primaryColor,
+                            shape: RoundedRectangleBorder(
+                              borderRadius:
+                                  BorderRadius.circular(size.width * 0.02),
+                            ),
+                          ),
+                          child: const CircularProgressIndicator(
+                            color: Colors.white,
+                          ),
+                        ),
+                      );
+                    } else {
+                      return const SizedBox();
+                    }
                   },
                 ),
               ],

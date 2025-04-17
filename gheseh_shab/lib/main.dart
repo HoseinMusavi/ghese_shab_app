@@ -2,72 +2,103 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gheseh_shab/app.dart';
-import 'package:gheseh_shab/data/models/story_model.dart';
-import 'package:gheseh_shab/data/repositories/login_repository.dart';
+import 'package:gheseh_shab/data/repositories/auth_repository.dart';
+import 'package:gheseh_shab/data/repositories/category_repository.dart';
 import 'package:gheseh_shab/data/repositories/story_repository.dart';
-import 'package:gheseh_shab/logic/login/login_bloc.dart';
+import 'package:gheseh_shab/logic/auth/login_bloc.dart';
+import 'package:gheseh_shab/logic/auth/register/register_bloc.dart';
+import 'package:gheseh_shab/logic/auth/reset_password_bloc.dart';
+import 'package:gheseh_shab/logic/category/category_bloc.dart';
+import 'package:gheseh_shab/logic/navigation/navigation_bloc.dart';
 import 'package:gheseh_shab/logic/story_bloc/story_bloc.dart';
 import 'package:gheseh_shab/logic/story_bloc/story_event.dart';
-import 'package:gheseh_shab/presentation/widgets/story_form.dart';
 import 'package:gheseh_shab/utils/theme.dart';
 
 void main() {
-  final storyRepository = Story_Repository();
-  final dio = Dio(); // ایجاد نمونه Dio برای LoginRepository
-  final loginRepository = LoginRepository(dio); // ایجاد LoginRepository
-
-  runApp(
-    MultiBlocProvider(
-      providers: [
-        BlocProvider(
-          create: (context) =>
-              StoryBloc(storyRepository)..add(FetchStoriesEvent()),
-        ),
-        BlocProvider(
-          create: (context) =>
-              LoginBloc(loginRepository), // اضافه کردن LoginBloc
-        ),
-      ],
-      child: MyApp(homeRepository: storyRepository),
-    ),
-  );
+  runApp(const MyApp());
 }
 
 class MyApp extends StatefulWidget {
-  final Story_Repository homeRepository;
-
-  MyApp({required this.homeRepository});
-
-  static _MyAppState of(BuildContext context) =>
-      context.findAncestorStateOfType<_MyAppState>()!;
+  const MyApp({Key? key}) : super(key: key);
 
   @override
-  _MyAppState createState() => _MyAppState();
+  State<MyApp> createState() => _MyAppState();
 }
 
 class _MyAppState extends State<MyApp> {
-  ThemeMode _themeMode = ThemeMode.light;
+  ThemeMode _themeMode = ThemeMode.system; // حالت پیش‌فرض تم
+  late ThemeData _currentTheme; // ذخیرهflutter run -v مرجع تم
 
-  void setThemeMode(ThemeMode themeMode) {
+  // وابستگی‌ها
+  late final Dio _dio;
+  late final AuthRepository _authRepository;
+  late final StoryRepository _storyRepository;
+  late final CategoryRepository _categoryRepository;
+
+  @override
+  void initState() {
+    super.initState();
+
+    // مقداردهی وابستگی‌ها
+    _dio = Dio(BaseOptions(baseUrl: 'https://qesseyeshab.ir/api'));
+    _authRepository = AuthRepository(dio: _dio);
+    _storyRepository = StoryRepository(); // فقط یک بار مقداردهی شود
+    _categoryRepository = CategoryRepository(dio: _dio);
+  }
+
+  void _setThemeMode(ThemeMode mode) {
     setState(() {
-      _themeMode = themeMode;
+      _themeMode = mode;
     });
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // ذخیره مرجع تم فعلی
+    _currentTheme = _themeMode == ThemeMode.dark
+        ? AppThemes.darkTheme
+        : AppThemes.lightTheme;
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      locale: const Locale('fa'), // تنظیم زبان به فارسی
-      themeMode: _themeMode,
-      theme: AppThemes.lightTheme, // استفاده از تم لایت
-      darkTheme: AppThemes.darkTheme, // استفاده از تم دارک
-      builder: (context, child) {
-        return Directionality(
-          textDirection: TextDirection.rtl, // راست‌چین کردن کل اپلیکیشن
-          child: child!,
-        );
-      },
-      home: GhesehShabApp(setThemeMode: setThemeMode), // تنظیم صفحه شروع
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(
+          create: (context) => LoginBloc(_authRepository),
+        ),
+        BlocProvider(
+          create: (context) =>
+              CategoryBloc(categoryRepository: _categoryRepository),
+        ),
+        BlocProvider(
+          create: (context) => RegisterBloc(authRepository: _authRepository),
+        ),
+        BlocProvider(
+          create: (context) =>
+              ResetPasswordBloc(authRepository: _authRepository),
+        ),
+        BlocProvider(
+          create: (context) => NavigationBloc(),
+        ),
+        BlocProvider(
+          create: (context) => StoryBloc(storyRepository: _storyRepository)
+            ..add(FetchStoriesEvent()),
+        ),
+      ],
+      child: MaterialApp(
+        title: 'Gheseh Shab',
+        theme: AppThemes.lightTheme, // تم روشن
+        darkTheme: AppThemes.darkTheme, // تم تاریک
+        themeMode: _themeMode, // حالت تم
+        home: Directionality(
+          textDirection: TextDirection.rtl, // راست‌چین کردن کل برنامه
+          child: MainNavigationScreen(
+            setThemeMode: _setThemeMode, // ارسال متد تغییر تم
+          ),
+        ),
+      ),
     );
   }
 }

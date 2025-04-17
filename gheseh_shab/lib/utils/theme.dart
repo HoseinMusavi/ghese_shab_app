@@ -13,12 +13,12 @@ class AppThemes {
           fontFamily: 'dana', fontWeight: FontWeight.bold, fontSize: 20),
     ),
     appBarTheme: const AppBarTheme(
-      backgroundColor: Colors.blueAccent,
+      backgroundColor: Color.fromARGB(255, 255, 255, 255),
       titleTextStyle: TextStyle(
         fontFamily: 'dana',
-        fontSize: 20,
+        fontSize: 14,
         fontWeight: FontWeight.bold,
-        color: Colors.white,
+        color: Color.fromARGB(255, 0, 0, 0),
       ),
       iconTheme: IconThemeData(color: Color.fromARGB(255, 0, 0, 0)),
     ),
@@ -45,10 +45,10 @@ class AppThemes {
           fontFamily: 'dana', fontWeight: FontWeight.bold, fontSize: 20),
     ),
     appBarTheme: const AppBarTheme(
-      backgroundColor: Colors.deepPurple,
+      backgroundColor: const Color(0xFF0E2A3A),
       titleTextStyle: TextStyle(
         fontFamily: 'dana',
-        fontSize: 20,
+        fontSize: 14,
         fontWeight: FontWeight.bold,
         color: Colors.white,
       ),

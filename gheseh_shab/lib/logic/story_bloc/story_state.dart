@@ -1,17 +1,31 @@
+import 'package:equatable/equatable.dart';
 import 'package:gheseh_shab/data/models/story_model.dart';
 
-abstract class Story_State {}
+abstract class StoryState extends Equatable {
+  const StoryState();
 
-class StoryInitial extends Story_State {}
-
-class StoryLoding extends Story_State {}
-
-class StoryLoded extends Story_State {
-  final List<StoryModel> storyList;
-  StoryLoded(this.storyList);
+  @override
+  List<Object?> get props => [];
 }
 
-class StoryError extends Story_State {
-  final String error;
-  StoryError(this.error);
+class StoryInitial extends StoryState {}
+
+class StoryLoading extends StoryState {}
+
+class StoryLoaded extends StoryState {
+  final List<StoryModel> stories;
+
+  const StoryLoaded({required this.stories});
+
+  @override
+  List<Object?> get props => [stories];
+}
+
+class StoryError extends StoryState {
+  final String message;
+
+  const StoryError({required this.message});
+
+  @override
+  List<Object?> get props => [message];
 }
