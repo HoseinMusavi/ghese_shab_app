@@ -60,10 +60,10 @@ class AuthRepository {
         },
       );
 
-      if (response.data['status'] == 'ok') {
-        // ذخیره توکن در حافظه محلی
-        await saveToken(response.data['token']);
-      }
+      // if (response.data['status'] == 'ok') {
+      //   // ذخیره توکن در حافظه محلی
+      //   await saveToken(response.data['token']);
+      // }
 
       return response.data;
     } catch (e) {
@@ -86,22 +86,25 @@ class AuthRepository {
     }
   }
 
-  /// ذخیره توکن در حافظه محلی
   Future<void> saveToken(String token) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('auth_token', token);
   }
 
-  /// دریافت توکن از حافظه محلی
   Future<String?> getToken() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString('auth_token');
   }
 
-  /// حذف توکن از حافظه محلی
   Future<void> clearToken() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('auth_token');
+  }
+
+  /// حذف همه اطلاعات کش شده از حافظه محلی
+  Future<void> clearAllCache() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.clear();
   }
 
   /// بازنشانی رمز عبور

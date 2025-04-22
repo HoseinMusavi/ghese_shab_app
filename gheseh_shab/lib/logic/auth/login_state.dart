@@ -1,3 +1,6 @@
+import 'package:dio/dio.dart';
+import 'package:gheseh_shab/data/repositories/auth_repository.dart';
+
 abstract class LoginState {}
 
 class LoginInitial extends LoginState {}
@@ -19,8 +22,16 @@ class LoginFailure extends LoginState {
 
 class LoginSuccessWithToken extends LoginState {
   final String token;
+  AuthRepository authRepository = AuthRepository(
+    dio: Dio(BaseOptions(baseUrl: 'https://qesseyeshab.ir/api')),
+  );
 
-  LoginSuccessWithToken(this.token);
+  // Constructor
+  LoginSuccessWithToken(this.token) {
+    authRepository.saveToken(token);
+  }
+
+  // Removed the duplicate constructor
 }
 
 class RegisterNeeded extends LoginState {

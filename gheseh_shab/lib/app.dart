@@ -10,11 +10,11 @@ import 'package:gheseh_shab/logic/user_info/user_bloc.dart';
 import 'package:gheseh_shab/logic/user_info/user_event.dart';
 import 'package:gheseh_shab/logic/user_info/user_state.dart';
 import 'package:gheseh_shab/presentation/screens/about_us.dart';
+import 'package:gheseh_shab/presentation/screens/dashbord/user_info.dart';
 import 'package:gheseh_shab/presentation/screens/home_page.dart';
 import 'package:gheseh_shab/presentation/screens/login/login_screen.dart';
 import 'package:gheseh_shab/presentation/screens/pls_login%20screen.dart';
-import 'package:gheseh_shab/presentation/screens/search_screen.dart';
-import 'package:gheseh_shab/presentation/screens/user_info.dart';
+import 'package:gheseh_shab/presentation/screens/serch/search_screen.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final bool isDarkMode;
@@ -76,9 +76,18 @@ class MainNavigationScreen extends StatelessWidget {
     final authRepo = AuthRepository(dio: dio);
     final userRepo = UserRepository(dio: dio, authRepository: authRepo);
 
-    return BlocProvider(
-      create: (context) =>
-          UserBloc(userRepository: userRepo)..add(CheckUserLoginEvent()),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(
+          create: (context) => UserBloc(
+            userRepository: userRepo,
+            authRepository: authRepo,
+          )..add(CheckUserLoginEvent()),
+        ),
+        BlocProvider(
+          create: (context) => NavigationBloc(),
+        ),
+      ],
       child: Scaffold(
         appBar: CustomAppBar(
           isDarkMode: isDarkMode,
@@ -130,10 +139,13 @@ class MainNavigationScreen extends StatelessWidget {
             return BottomNavigationBar(
               currentIndex: currentIndex,
               onTap: (index) {
-                final destination = isLoggedOut && index != 0 ? 0 : index;
-                context
-                    .read<NavigationBloc>()
-                    .add(ChangePageEvent(destination));
+                if (isLoggedOut && (index == 1 || index == 2)) {
+                  context
+                      .read<NavigationBloc>()
+                      .add(ChangePageEvent(0)); // بازگشت به خانه
+                } else {
+                  context.read<NavigationBloc>().add(ChangePageEvent(index));
+                }
               },
               backgroundColor: Theme.of(context).scaffoldBackgroundColor,
               selectedItemColor: Theme.of(context).colorScheme.primary,

@@ -1,30 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gheseh_shab/data/models/user_model.dart';
+import 'package:gheseh_shab/data/repositories/invite_repository.dart';
 import 'package:gheseh_shab/data/repositories/user_repository.dart';
+import 'package:gheseh_shab/logic/user_info/user_bloc.dart';
+import 'package:gheseh_shab/logic/user_info/user_event.dart';
+import 'package:gheseh_shab/logic/user_info/user_state.dart';
 import 'package:gheseh_shab/main.dart';
-import 'package:gheseh_shab/presentation/screens/accunt_update_screen.dart';
+import 'package:gheseh_shab/presentation/screens/dashbord/accunt_update_screen.dart';
+import 'package:gheseh_shab/presentation/screens/dashbord/by_token/buy_coin_screen.dart';
+import 'package:gheseh_shab/presentation/screens/dashbord/by_token/invite_screen.dart';
+import 'package:gheseh_shab/presentation/screens/dashbord/rutaite_screen.dart';
 
-class UserDetailsScreen extends StatefulWidget {
+class UserDetailsScreen extends StatelessWidget {
   final UserRepository userRepository;
 
   const UserDetailsScreen({Key? key, required this.userRepository})
       : super(key: key);
 
-  @override
-  State<UserDetailsScreen> createState() => _UserDetailsScreenState();
-}
-
-class _UserDetailsScreenState extends State<UserDetailsScreen> {
-  late Future<UserModel> _userFuture;
-
-  @override
-  void initState() {
-    super.initState();
-    _userFuture = widget.userRepository.fetchUserInfo();
-  }
-
-  Future<void> _logout() async {
-    await widget.userRepository.authRepository.clearToken();
+  Future<void> _logout(BuildContext context) async {
+    await userRepository.authRepository.clearAllCache();
     Navigator.of(context).pushAndRemoveUntil(
       MaterialPageRoute(builder: (context) => const MyApp()),
       (route) => false,
@@ -38,63 +33,66 @@ class _UserDetailsScreenState extends State<UserDetailsScreen> {
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
-      body: FutureBuilder<UserModel>(
-        future: _userFuture,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
+      body: BlocBuilder<UserBloc, UserState>(
+        builder: (context, state) {
+          if (state is UserLoading) {
             return const Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return Center(child: Text('خطا: ${snapshot.error}'));
-          } else if (!snapshot.hasData) {
-            return const Center(child: Text('اطلاعاتی یافت نشد.'));
+          } else if (state is UserError) {
+            return Center(child: Text('خطا: ${state.message}'));
+          } else if (state is UserLoggedOut) {
+            return const Center(child: Text('لطفاً وارد شوید.'));
+          } else if (state is UserLoggedIn) {
+            final user = UserModel.fromJson(state.user);
+
+            return SingleChildScrollView(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                children: [
+                  _buildProfileCard(user, isDark),
+                  const SizedBox(height: 16),
+                  _buildMainButton(
+                    context: context,
+                    icon: Icons.edit,
+                    label: 'ویرایش اطلاعات',
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const AccountUpdateScreen(),
+                        ),
+                      ).then((_) {
+                        // پس از بازگشت از صفحه ویرایش، اطلاعات کاربر را دوباره بارگذاری کن
+                        context.read<UserBloc>().add(CheckUserLoginEvent());
+                      });
+                    },
+                    color: isDark ? Colors.blueGrey[700]! : Colors.blue,
+                  ),
+                  const SizedBox(height: 16),
+                  _buildGridActions(context, isDark),
+                  const SizedBox(height: 16),
+                  _buildMainButton(
+                    context: context,
+                    icon: Icons.visibility_off,
+                    label: 'دسته‌بندی‌های پنهان',
+                    onPressed: () {
+                      // TODO: نمایش دسته‌بندی‌های پنهان
+                    },
+                    color: isDark ? Colors.grey[700]! : Colors.cyan,
+                  ),
+                  const SizedBox(height: 16),
+                  _buildMainButton(
+                    context: context,
+                    icon: Icons.logout,
+                    label: 'خروج از حساب',
+                    onPressed: () => _logout(context),
+                    color: Colors.red,
+                  ),
+                ],
+              ),
+            );
           }
 
-          final user = snapshot.data!;
-          return SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              children: [
-                _buildProfileCard(user, isDark),
-                const SizedBox(height: 16),
-                _buildMainButton(
-                  icon: Icons.edit,
-                  label: 'ویرایش اطلاعات',
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const AccountUpdateScreen(),
-                      ),
-                    ).then((_) {
-                      // پس از بازگشت از صفحه ویرایش، اطلاعات کاربر را دوباره بارگذاری کن
-                      setState(() {
-                        _userFuture = widget.userRepository.fetchUserInfo();
-                      });
-                    });
-                  },
-                  color: isDark ? Colors.blueGrey[700]! : Colors.blue,
-                ),
-                const SizedBox(height: 16),
-                _buildGridActions(isDark),
-                const SizedBox(height: 16),
-                _buildMainButton(
-                  icon: Icons.visibility_off,
-                  label: 'دسته‌بندی‌های پنهان',
-                  onPressed: () {
-                    // TODO: نمایش دسته‌بندی‌های پنهان
-                  },
-                  color: isDark ? Colors.grey[700]! : Colors.cyan,
-                ),
-                const SizedBox(height: 16),
-                _buildMainButton(
-                  icon: Icons.logout,
-                  label: 'خروج از حساب',
-                  onPressed: _logout,
-                  color: Colors.red,
-                ),
-              ],
-            ),
-          );
+          return const Center(child: Text('اطلاعاتی یافت نشد.'));
         },
       ),
     );
@@ -168,28 +166,31 @@ class _UserDetailsScreenState extends State<UserDetailsScreen> {
   }
 
   Widget _buildMainButton({
+    required BuildContext context,
     required IconData icon,
     required String label,
     required VoidCallback onPressed,
     required Color color,
   }) {
-    return ElevatedButton.icon(
-      onPressed: onPressed,
-      icon: Icon(icon),
-      label: Text(label),
-      style: ElevatedButton.styleFrom(
-        backgroundColor: color,
-        foregroundColor: Colors.white,
-        padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-        minimumSize: Size(MediaQuery.of(context).size.width * 0.9, 50),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
+    return SizedBox(
+      width: MediaQuery.of(context).size.width * 0.9,
+      height: 50,
+      child: ElevatedButton.icon(
+        onPressed: onPressed,
+        icon: Icon(icon),
+        label: Text(label),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: color,
+          foregroundColor: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildGridActions(bool isDark) {
+  Widget _buildGridActions(BuildContext context, bool isDark) {
     return GridView.count(
       crossAxisCount: 2,
       shrinkWrap: true,
@@ -201,7 +202,12 @@ class _UserDetailsScreenState extends State<UserDetailsScreen> {
           icon: Icons.casino,
           label: 'گردونه شانس',
           onTap: () {
-            // TODO
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) {
+                return const WheelPage();
+              }),
+            );
           },
           isDark: isDark,
         ),
@@ -209,7 +215,14 @@ class _UserDetailsScreenState extends State<UserDetailsScreen> {
           icon: Icons.attach_money,
           label: 'خرید سکه',
           onTap: () {
-            // TODO
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const CoinPurchaseScreen(),
+              ),
+            ).then((_) {
+              context.read<UserBloc>().add(CheckUserLoginEvent());
+            });
           },
           isDark: isDark,
         ),
@@ -217,7 +230,17 @@ class _UserDetailsScreenState extends State<UserDetailsScreen> {
           icon: Icons.group,
           label: 'دعوت دوستان',
           onTap: () {
-            // TODO
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => InviteScreen(
+                  inviteRepository: InviteRepository(
+                    dio: userRepository.dio,
+                    authRepository: userRepository.authRepository,
+                  ),
+                ),
+              ),
+            );
           },
           isDark: isDark,
         ),

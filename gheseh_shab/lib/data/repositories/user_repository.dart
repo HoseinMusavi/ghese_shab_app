@@ -14,6 +14,7 @@ class UserRepository {
     try {
       // دریافت توکن از AuthRepository
       final token = await authRepository.getToken();
+      print("....................................");
       authRepository.printToken();
       if (token == null) {
         throw Exception("توکن یافت نشد. لطفاً وارد شوید.");
@@ -31,6 +32,8 @@ class UserRepository {
 
       // بررسی وضعیت پاسخ
       if (response.statusCode == 200) {
+        // print("User data: ${response.data}");
+        // // تبدیل داده‌های دریافتی به مدل UserModel
         return UserModel.fromJson(response.data);
       } else {
         throw Exception(

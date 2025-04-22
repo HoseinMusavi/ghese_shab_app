@@ -11,7 +11,6 @@ class UserLoading extends UserState {}
 
 class UserLoggedIn extends UserState {
   final Map<String, dynamic> user;
-
   UserLoggedIn({required this.user});
 
   @override

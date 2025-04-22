@@ -4,12 +4,14 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gheseh_shab/app.dart';
 import 'package:gheseh_shab/data/repositories/auth_repository.dart';
 import 'package:gheseh_shab/data/repositories/category_repository.dart';
+import 'package:gheseh_shab/data/repositories/coin_repository.dart';
 import 'package:gheseh_shab/data/repositories/story_repository.dart';
 import 'package:gheseh_shab/data/repositories/user_repository.dart';
 import 'package:gheseh_shab/logic/auth/login_bloc.dart';
 import 'package:gheseh_shab/logic/auth/register/register_bloc.dart';
 import 'package:gheseh_shab/logic/auth/reset_password_bloc.dart';
 import 'package:gheseh_shab/logic/category/category_bloc.dart';
+import 'package:gheseh_shab/logic/coin/coin_bloc.dart';
 import 'package:gheseh_shab/logic/navigation/navigation_bloc.dart';
 import 'package:gheseh_shab/logic/story_bloc/story_bloc.dart';
 import 'package:gheseh_shab/logic/story_bloc/story_event.dart';
@@ -75,8 +77,19 @@ class _MyAppState extends State<MyApp> {
           create: (context) => LoginBloc(_authRepository),
         ),
         BlocProvider(
-          create: (context) => UserBloc(userRepository: _userRepository)
-            ..add(CheckUserLoginEvent()),
+          create: (context) => CoinBloc(
+            _authRepository,
+            coinRepository: CoinRepository(
+              dio: _dio,
+              authRepository: _authRepository,
+            ),
+          ),
+        ),
+        BlocProvider(
+          create: (context) => UserBloc(
+            userRepository: _userRepository,
+            authRepository: _authRepository,
+          )..add(CheckUserLoginEvent()),
         ),
         BlocProvider(
           create: (context) =>

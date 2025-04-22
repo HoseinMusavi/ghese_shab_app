@@ -4,9 +4,9 @@ import 'package:persian_datetime_picker/persian_datetime_picker.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 
-import '../../logic/user_info/user_bloc.dart';
-import '../../logic/user_info/user_event.dart';
-import '../../logic/user_info/user_state.dart';
+import '../../../logic/user_info/user_bloc.dart';
+import '../../../logic/user_info/user_event.dart';
+import '../../../logic/user_info/user_state.dart';
 
 class AccountUpdateScreen extends StatefulWidget {
   const AccountUpdateScreen({Key? key}) : super(key: key);

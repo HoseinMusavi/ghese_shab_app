@@ -17,3 +17,9 @@ class UpdateUserInfoEvent extends UserEvent {
   @override
   List<Object?> get props => [userInfo, image];
 }
+
+class LoginSuccessEvent extends UserEvent {
+  final String token;
+
+  LoginSuccessEvent({required this.token});
+}
